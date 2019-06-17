@@ -1,0 +1,50 @@
+<!doctype html>
+<html>
+      <head>
+                  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+                  <script>
+            google.charts.load('current', {packages: ['corechart', 'bar']});
+            google.charts.setOnLoadCallback(drawMaterial);
+            
+            function drawMaterial() {
+                  var data = google.visualization.arrayToDataTable([
+                    [ 'Start - End', 'count'],
+                    {% for i in result %}
+                    [ '{{i[0]}}'+'-'+'{{i[1]}}',Number('{{i[2]}}')],
+                    {% endfor%}
+                  ]);
+            
+                  var materialOptions = {
+                    chart: {
+                      title: 'Count Vs Number Of Iterations'
+                    },
+                    hAxis: {
+                      title: 'Count',
+                      minValue: 0,
+                    },
+                    vAxis: {
+                      title: 'Number of Iterations'
+                    },
+                    bars: 'horizontal'
+                  };
+                  var materialChart = new google.charts.Bar(document.getElementById('chart_div'));
+                  materialChart.draw(data, materialOptions);
+                }
+                        </script>      
+                  
+      </head>
+   <body>
+         <h1>AKSHAY SHENVI</h1>
+         <h1>1001670648</h1>
+         <hr>
+         <div id="chart_div"></div>
+            
+
+            
+
+
+
+         <hr>
+      
+      </body>
+</html>
