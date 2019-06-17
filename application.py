@@ -170,6 +170,7 @@ def magrange():
         startmag+=float(step)
         stependmag+=float(step)
     #print(result[0][0])
+    print(result)
     return render_template('showrecords.html',result=result)
         
 
