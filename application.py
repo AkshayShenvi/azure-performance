@@ -80,7 +80,7 @@ def sqlconnwithredis(sqlQuery,num):
     myHostname = "akshay.redis.cache.windows.net"
     myPassword = "JehPyQGvHgF20jSqBN0k9n6sAgGDGaMSgaoKnO3DoXY="
     r = redis.StrictRedis(host=myHostname, port=6380,password=myPassword,ssl=True)
-    
+    cursor = connection.cursor()
     if num == None:
         num= 1
     key="SQL:"+sqlQuery
