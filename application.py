@@ -263,16 +263,34 @@ def scatterLongitude():
 def rangewithmag():
     latfrom = float(request.args.get('latfrom',''))
     latto= float(request.args.get('latto',''))
-    # count = int(request.args.get('count',''))
-    # interval= float(request.args.get('interval',''))
-    time=[]
-    timewithOutRedis=0
-    timewithRedis=0
-    #for i in range(count):
-        #random_num=randrange_float(magfrom,magto,interval)
-    sqlQuery = "select place,time,mag from QUAKES1 where latitude BETWEEN '"+str(latfrom)+"' AND '"+str(latto)+"';"
-    row=sqlconn(sqlQuery)
-    print(row)
+    count = int(request.args.get('count',''))
+    #interval= float(request.args.get('interval',''))
+    timeli=[]
+    data=[]
+    #timewithOutRedis=0
+    #timewithRedis=0
+    for i in range(count):
+        
+        randomnumfrom = round((random.uniform(float(latfrom),float(latto))),1)
+        randomnumto = round((random.uniform(float(latfrom),float(latto))),1)
+        print(randomnumfrom,randomnumto)
+        if float(randomnumfrom)>float(randomnumto):
+            temp=randomnumfrom
+            randomnumfrom=randomnumto
+            randomnumto=temp
+        sqlQuery = "select place,time,mag from QUAKES1 where latitude BETWEEN '"+str(randomnumfrom)+"' AND '"+str(randomnumto)+"';"
+        tic=time.time()
+        row=sqlconn(sqlQuery)
+        toc=time.time()
+        if len(row) ==0:
+            continue
+        else:
+            #print(row[0])
+            data.append(row[0])
+        time1=toc-tic
+        timeli.append(time1)
+    #print(time)
+
 
 
         #elapsedWithoutRedis,elapsedWithRedis=sqlconnwithredis(sqlQuery,1)
@@ -281,7 +299,7 @@ def rangewithmag():
         #timewithRedis+=elapsedWithRedis[0]
         #time.append([elapsedWithoutRedis[0],elapsedWithRedis[0]])
     
-    return render_template('something.html',result=row)
+    return render_template('something.html',result=data,time=timeli)
 
 
 # @app.route('/practicequiz')
