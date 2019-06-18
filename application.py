@@ -265,15 +265,16 @@ def rangewithmag():
     latto= float(request.args.get('latto',''))
     count = int(request.args.get('count',''))
     #interval= float(request.args.get('interval',''))
-    #myHostname = "akshay.redis.cache.windows.net"
-    #myPassword = "JehPyQGvHgF20jSqBN0k9n6sAgGDGaMSgaoKnO3DoXY="
+    myHostname = "akshay.redis.cache.windows.net"
+    myPassword = "JehPyQGvHgF20jSqBN0k9n6sAgGDGaMSgaoKnO3DoXY="
     
-    #r = redis.StrictRedis(host=myHostname, port=6380,password=myPassword,ssl=True)
+    r = redis.StrictRedis(host=myHostname, port=6380,password=myPassword,ssl=True)
     timeli=[]
     data=[]
     randnumbers=[]
     #timewithOutRedis=0
     #timewithRedis=0
+    totaltime=0
     for i in range(count):
         
         randomnumfrom = round((random.uniform(float(latfrom),float(latto))),1)
@@ -285,10 +286,29 @@ def rangewithmag():
             randomnumfrom=randomnumto
             randomnumto=temp
         sqlQuery = "select count(*) from QUAKES1 where latitude BETWEEN '"+str(randomnumfrom)+"' AND '"+str(randomnumto)+"';"
-        #key="SQL:"+sqlQuery
+        key="SQL:"+sqlQuery
         tic=time.time()
-        row=sqlconn(sqlQuery)
+        #row=sqlconn(sqlQuery)
+        
+
+
+        if r.get(key):
+            
+            value=r.get(key)
+            
+            
+            print("Redis working")
+        else:
+            
+            row=sqlconn(sqlQuery)
+            
+            
+            r.set(key,str(row))
+            #r.expire()
+            print("Not found in redis")
         toc=time.time()
+        
+
         randnumbers.append([randomnumfrom,randomnumto,row[0][0]])
         print(row[0][0])
         # if len(row) ==0:
@@ -297,6 +317,7 @@ def rangewithmag():
         #     #print(row[0])
         #     data.append(row[0])
         time1=toc-tic
+        totaltime+=time1
         timeli.append(time1)
     #print(randnumbers)
 
@@ -308,7 +329,7 @@ def rangewithmag():
         #timewithRedis+=elapsedWithRedis[0]
         #time.append([elapsedWithoutRedis[0],elapsedWithRedis[0]])
     
-    return render_template('something.html',time=timeli,randnumbers=randnumbers)
+    return render_template('something.html',time=timeli,randnumbers=randnumbers,totaltime=totaltime)
 
 
 # @app.route('/practicequiz')
