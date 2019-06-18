@@ -4,6 +4,18 @@
 
     </head>
     <body>
-        
+        <table>
+            <tr>
+                <th>Without Redis</th>
+                <th>With Redis</th>
+                
+            </tr>
+            <tr>
+                {% for i in result%}
+                <td>{{i[0]}}</td>
+                <td>{{i[1]}}</td>
+                {% endfor %}
+            </tr>
+        </table>
     </body>
 </html>

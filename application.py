@@ -47,7 +47,7 @@ def connectAndQueryRun(sqlQuery):
     toc= time.time()
     acttime=toc-tic
     row = cursor.fetchall()
-    print(row[0][0])
+    #print(row[0][0])
     return row, acttime
 
 
@@ -169,8 +169,8 @@ def magrange():
     result=[]
     while stependmag<=float(magto):
         sqlQuery="SELECT COUNT(*) AS COUNT FROM QUAKES WHERE MAG BETWEEN '"+str(startmag)+"' AND '"+str(stependmag)+"';"
-        row=connectAndQueryRun(sqlQuery)
-        print(int(row[0][0]))
+        row,acttime=connectAndQueryRun(sqlQuery)
+        print(row[0])
         ans=int(row[0][0])
         result.append([startmag,stependmag,ans])
         startmag+=float(step)
@@ -189,7 +189,7 @@ def scatterLongitude():
         magfrom=magto
         magto=temp
     sqlQuery="SELECT latitude, longitude FROM QUAKES WHERE MAG BETWEEN '"+str(magfrom)+"' AND '"+str(magto)+"' ;"
-    row=connectAndQueryRun(sqlQuery)
+    row,acttime=connectAndQueryRun(sqlQuery)
     print(row[0][0])
     for i in row:
         print(i[0])
@@ -206,9 +206,11 @@ def rangewithmag():
     magfrom = float(request.args.get('magfrom',''))
     magto= float(request.args.get('magto',''))
     count = int(request.args.get('count',''))
-    interval= float(request.arg.get('interval',''))
+    interval= float(request.args.get('interval',''))
     i=0
-    returning
+    timewithoutredis=[]
+    timewithredis=[]
+    totaltime=[]
     while i< int(count):
         lower=randrange_float(magfrom,magto,interval)
         upper=randrange_float(magfrom,magto,interval)
@@ -224,6 +226,7 @@ def rangewithmag():
             row,noredistime=connectAndQueryRun(sqlQuery)
             steplow+=float(interval)
             stephigh+=float(interval)
+            timewithoutredis.append(noredistime)
         #With Redis
         while float(stephigh)<float(upper):
             sqlQuery="SELECT Count(*) FROM QUAKES WHERE MAG BETWEEN '"+str(lower)+"' AND '"+str(upper)+"' ;"
@@ -232,6 +235,7 @@ def rangewithmag():
             r = redis.StrictRedis(host=myHostname, port=6380,password=myPassword,ssl=True)
             key="SQL:"+sqlQuery
             if r.get(key):
+                print("working")
                 rtic=time.time()
                 value=r.get(key)
                 rtoc=time.time()
@@ -245,9 +249,14 @@ def rangewithmag():
 
             steplow+=float(interval)
             stephigh+=float(interval)
+            timewithredis.append(rtime)
         i+=1
+    print(len(timewithoutredis))
+    print(len(timewithredis))
+    for i in range(0,len(timewithoutredis)):
+        totaltime.append([timewithoutredis[i],timewithredis[i]])
 
-    return render_template('something.html',noredistime=noredistime)
+    return render_template('something.html',time=totaltime)
 
          
 
