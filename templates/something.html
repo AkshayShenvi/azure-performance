@@ -4,9 +4,9 @@
 
     </head>
     <body>
-        <h1>Total time With Redis:{{withRedis}}</h1>
-        <h1>Total time Without Redis:{{withOutRedis}}</h1>
-        <table>
+        <!-- <h1>Total time With Redis:{{withRedis}}</h1>
+        <h1>Total time Without Redis:{{withOutRedis}}</h1> -->
+        <!-- <table>
             <tr>
                 <th>Without Redis</th>
                 <th>With Redis</th>
@@ -20,6 +20,24 @@
                 
             </tr>
             {% endfor %}
-        </table>
+        </table> -->
+        <table>
+                <tr>
+                        <th>Place</th>
+                        <th>time</th>
+                        <th>mag</th>
+                        
+                    </tr>
+                    {% for i in result %}
+                    <tr>
+                        
+                        <td>{{i[0]}}</td>
+                        <td>{{i[1]}}</td>
+                        <td>{{i[2]}}</td>
+                        
+                    </tr>
+                    {% endfor %}
+
+    </table>
     </body>
 </html>

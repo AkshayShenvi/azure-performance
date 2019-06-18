@@ -13,7 +13,7 @@ app = Flask(__name__)
 def randrange_float(start, stop, step):
     return random.randint(0, int(round(abs(((stop - start) / step)))))
 
-def sqlconn(sqlQuery,num):
+def sqlconn(sqlQuery):
     #try:
 
     server = 'akshayshenvi.database.windows.net'
@@ -23,15 +23,15 @@ def sqlconn(sqlQuery,num):
     driver= '{ODBC Driver 17 for SQL Server}'
     connection = pyodbc.connect('DRIVER='+driver+';SERVER='+server+';PORT=1433;DATABASE='+database+';UID='+username+';PWD='+ password)
     cursor = connection.cursor()
-    if num == None:
-        num= 1
+    # if num == None:
+    #     num= 1
 
-    for i in range(num):
-        cursor.execute(sqlQuery)
-    row = cursor.fetchone()
-    while row:
-        row = cursor.fetchone()
-    return None
+    # for i in range(num):
+    cursor.execute(sqlQuery)
+    row = cursor.fetchall()
+    # while row:
+    #     row = cursor.fetchone()
+    return row
 
 def connectAndQueryRun(sqlQuery):
     server = 'akshayshenvi.database.windows.net'
@@ -261,23 +261,48 @@ def scatterLongitude():
 
 @app.route('/practicequiz')
 def rangewithmag():
-    magfrom = float(request.args.get('magfrom',''))
-    magto= float(request.args.get('magto',''))
-    count = int(request.args.get('count',''))
-    interval= float(request.args.get('interval',''))
+    latfrom = float(request.args.get('latfrom',''))
+    latto= float(request.args.get('latto',''))
+    # count = int(request.args.get('count',''))
+    # interval= float(request.args.get('interval',''))
     time=[]
     timewithOutRedis=0
     timewithRedis=0
-    for i in range(count):
-        random_num=randrange_float(magfrom,magto,interval)
-        sqlQuery = "select place from QUAKES where mag = '"+str(random_num)+"';"
-        elapsedWithoutRedis,elapsedWithRedis=sqlconnwithredis(sqlQuery,1)
+    #for i in range(count):
+        #random_num=randrange_float(magfrom,magto,interval)
+    sqlQuery = "select place,time,mag from QUAKES1 where latitude BETWEEN '"+str(latfrom)+"' AND '"+str(latto)+"';"
+    row=sqlconn(sqlQuery)
+    print(row)
+
+
+        #elapsedWithoutRedis,elapsedWithRedis=sqlconnwithredis(sqlQuery,1)
         #print(elapsedWithoutRedis[0],elapsedWithRedis[0])
-        timewithOutRedis+=elapsedWithoutRedis[0]
-        timewithRedis+=elapsedWithRedis[0]
-        time.append([elapsedWithoutRedis[0],elapsedWithRedis[0]])
+        #timewithOutRedis+=elapsedWithoutRedis[0]
+        #timewithRedis+=elapsedWithRedis[0]
+        #time.append([elapsedWithoutRedis[0],elapsedWithRedis[0]])
     
-    return render_template('something.html',time=time,withOutRedis=timewithOutRedis,withRedis=timewithRedis)
+    return render_template('something.html',result=row)
+
+
+# @app.route('/practicequiz')
+# def rangewithmag():
+#     magfrom = float(request.args.get('magfrom',''))
+#     magto= float(request.args.get('magto',''))
+#     count = int(request.args.get('count',''))
+#     interval= float(request.args.get('interval',''))
+#     time=[]
+#     timewithOutRedis=0
+#     timewithRedis=0
+#     for i in range(count):
+#         random_num=randrange_float(magfrom,magto,interval)
+#         sqlQuery = "select place from QUAKES where mag = '"+str(random_num)+"';"
+#         elapsedWithoutRedis,elapsedWithRedis=sqlconnwithredis(sqlQuery,1)
+#         #print(elapsedWithoutRedis[0],elapsedWithRedis[0])
+#         timewithOutRedis+=elapsedWithoutRedis[0]
+#         timewithRedis+=elapsedWithRedis[0]
+#         time.append([elapsedWithoutRedis[0],elapsedWithRedis[0]])
+    
+#     return render_template('something.html',time=time,withOutRedis=timewithOutRedis,withRedis=timewithRedis)
          
 
 port = os.getenv('PORT', '8000')
