@@ -1,6 +1,8 @@
 <!doctype html>
 <html>
       <head>
+
+                  <!-- Bar Graph         -->
                   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
                   <script>
             google.charts.load('current', {packages: ['corechart', 'bar']});
@@ -33,7 +35,7 @@
                         </script> 
                         
                         
-
+                        <!-- Piechart -->
                         <script type="text/javascript">
                           google.charts.load('current', {'packages':['corechart']});
                           google.charts.setOnLoadCallback(drawChart);
@@ -56,6 +58,63 @@
                             chart.draw(data, options);
                           }
                         </script>
+
+
+
+                         <!-- Scatter Plot  -->
+                         <script>
+                            google.charts.load('current', {'packages':['corechart']});
+                            google.charts.setOnLoadCallback(drawChart);
+
+                            function drawChart() {
+                              var data = google.visualization.arrayToDataTable([
+                              [ 'Start - End', 'count'],
+                                {% for i in result %}
+                                [ '{{i[0]}}'+'-'+'{{i[1]}}',Number('{{i[2]}}')],
+                                {% endfor%}
+                              ]);
+
+                              var options = {
+                                title: 'Count of Mag Ranges',
+                                hAxis: {title: 'Magnitude', minValue: 0, maxValue: 15},
+                                vAxis: {title: 'Count', minValue: 0, maxValue: 15},
+                                legend: 'none'
+                              };
+
+                              var chart = new google.visualization.ScatterChart(document.getElementById('chart_div_scatterplot'));
+
+                              chart.draw(data, options);
+                            }
+
+                         </script>
+
+                         <!-- Histogram -->
+
+                         <script>
+                         
+                          google.charts.load("current", {packages:["corechart"]});
+                          google.charts.setOnLoadCallback(drawChart);
+                          function drawChart() {
+                            var data = google.visualization.arrayToDataTable([
+                            [ 'Start - End', 'count'],
+                                {% for i in result %}
+                                [ '{{i[0]}}'+'-'+'{{i[1]}}',Number('{{i[2]}}')],
+                                {% endfor%}
+                                ]);
+                            var options = {
+                              title: 'Count of Mag Ranges',
+                              hAxis: {title: 'Magnitude', minValue: 0, maxValue: 15},
+                                vAxis: {title: 'Count', minValue: 0, maxValue: 15},
+                              legend: { position: 'none' },
+                            };
+
+                            var chart = new google.visualization.Histogram(document.getElementById('chart_div_histogram'));
+                            chart.draw(data, options);
+                          }
+                         
+                         
+                         
+                         </script>
                   
       </head>
    <body>
@@ -65,6 +124,10 @@
          <div id="chart_div"></div>
          <hr>
          <div id="piechart" style="width: 900px; height: 500px;"></div>
+         <hr>
+         <div id="chart_div_scatterplot" style="width: 900px; height: 500px;"></div>
+         <hr>
+         <div id="chart_div_histogram" style="width: 900px; height: 500px;"></div>
             
 
             

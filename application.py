@@ -3,13 +3,15 @@ import os
 import pyodbc
 import time
 import redis
+import random
 
 
 
 from flask import Flask
 app = Flask(__name__)
 
-
+def randrange_float(start, stop, step):
+    return random.randint(0, int(round(abs(((stop - start) / step)))))
 
 def sqlconn(sqlQuery,num):
     #try:
@@ -38,11 +40,15 @@ def connectAndQueryRun(sqlQuery):
     password = 'Akshata1992'
     driver= '{ODBC Driver 17 for SQL Server}'
     connection = pyodbc.connect('DRIVER='+driver+';SERVER='+server+';PORT=1433;DATABASE='+database+';UID='+username+';PWD='+ password)
+    
     cursor = connection.cursor()
+    tic= time.time()
     cursor.execute(sqlQuery)
+    toc= time.time()
+    acttime=toc-tic
     row = cursor.fetchall()
     print(row[0][0])
-    return row
+    return row, acttime
 
 
 def sqlconnwithredis(sqlQuery,num):
@@ -143,10 +149,10 @@ def complexquerywithredis():
 
     data=[]
     elapsedworedis,elapsedwithredis=sqlconnwithredis(sqlQuery,num)
-    data.append(elapsedworedis)
-    data.append(elapsedwithredis)
+    data.append([elapsedworedis,elapsedwithredis])
+    
 
-    return render_template("showrecords.html",data=data)
+    return render_template("showredis.html",data=data)
 
 
 @app.route("/magrange")
@@ -172,7 +178,78 @@ def magrange():
     #print(result[0][0])
     print(result)
     return render_template('showrecords.html',result=result)
-        
+
+@app.route('/scatterlongitude')
+def scatterLongitude():
+    magfrom = request.args.get('magfrom','')
+    magto= request.args.get('magto','')
+    loc=[]
+    if float(magfrom)>float(magto):
+        temp=magfrom
+        magfrom=magto
+        magto=temp
+    sqlQuery="SELECT latitude, longitude FROM QUAKES WHERE MAG BETWEEN '"+str(magfrom)+"' AND '"+str(magto)+"' ;"
+    row=connectAndQueryRun(sqlQuery)
+    print(row[0][0])
+    for i in row:
+        print(i[0])
+        lat=float(i[0])
+        longitude=float(i[1])
+        loc.append([lat,longitude])
+    return render_template('scatterlongilati.html',result=loc)
+
+
+
+
+@app.route('/practicequiz')
+def rangewithmag():
+    magfrom = float(request.args.get('magfrom',''))
+    magto= float(request.args.get('magto',''))
+    count = int(request.args.get('count',''))
+    interval= float(request.arg.get('interval',''))
+    i=0
+    returning
+    while i< int(count):
+        lower=randrange_float(magfrom,magto,interval)
+        upper=randrange_float(magfrom,magto,interval)
+        if float(lower)>float(upper):
+            temp=lower
+            lower=upper
+            upper=temp
+        steplow=float(lower) 
+        stephigh=steplow+interval
+        #Without Redis 
+        while float(stephigh)<float(upper):
+            sqlQuery="SELECT Count(*) FROM QUAKES WHERE MAG BETWEEN '"+str(lower)+"' AND '"+str(upper)+"' ;"
+            row,noredistime=connectAndQueryRun(sqlQuery)
+            steplow+=float(interval)
+            stephigh+=float(interval)
+        #With Redis
+        while float(stephigh)<float(upper):
+            sqlQuery="SELECT Count(*) FROM QUAKES WHERE MAG BETWEEN '"+str(lower)+"' AND '"+str(upper)+"' ;"
+            myHostname = "akshay.redis.cache.windows.net"
+            myPassword = "JehPyQGvHgF20jSqBN0k9n6sAgGDGaMSgaoKnO3DoXY="
+            r = redis.StrictRedis(host=myHostname, port=6380,password=myPassword,ssl=True)
+            key="SQL:"+sqlQuery
+            if r.get(key):
+                rtic=time.time()
+                value=r.get(key)
+                rtoc=time.time()
+                rtime=rtoc-rtic
+            else:
+                rtic=time.time()
+                row,noredistime=connectAndQueryRun(sqlQuery)
+                r.set(key,str(row))
+                rtoc=time.time()
+                rtime=rtoc-rtic
+
+            steplow+=float(interval)
+            stephigh+=float(interval)
+        i+=1
+
+    return render_template('something.html',noredistime=noredistime)
+
+         
 
 port = os.getenv('PORT', '8000')
 

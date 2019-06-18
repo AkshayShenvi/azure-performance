@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+        <script>
+            google.charts.load('current', {'packages':['corechart']});
+            google.charts.setOnLoadCallback(drawChart);
+
+            function drawChart() {
+                var data = google.visualization.arrayToDataTable([
+                [ 'Start - End', 'count'],
+                {% for i in result %}
+                [ Number('{{i[1]}}'),Number('{{i[0]}}')],
+                {% endfor%}
+                ]);
+
+                var options = {
+                title: 'Long Vs Lat',
+                hAxis: {title: 'Longitude', minValue: -180, maxValue: 180},
+                vAxis: {title: 'Latitude', minValue: -90, maxValue: 90},
+                legend: 'none'
+                };
+
+                var chart = new google.visualization.ScatterChart(document.getElementById('chart_div_scatterplot'));
+
+                chart.draw(data, options);
+            }
+
+        </script>
+
+    </head>
+    <body>
+        <hr>
+        <div id="chart_div_scatterplot" style="width: 900px; height: 500px;"></div>
+        <hr>
+    </body>
+</html>
