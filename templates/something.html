@@ -4,18 +4,22 @@
 
     </head>
     <body>
+        <h1>Total time With Redis:{{withRedis}}</h1>
+        <h1>Total time Without Redis:{{withOutRedis}}</h1>
         <table>
             <tr>
                 <th>Without Redis</th>
                 <th>With Redis</th>
                 
             </tr>
+            {% for i in time %}
             <tr>
-                {% for i in result%}
+                
                 <td>{{i[0]}}</td>
                 <td>{{i[1]}}</td>
-                {% endfor %}
+                
             </tr>
+            {% endfor %}
         </table>
     </body>
 </html>

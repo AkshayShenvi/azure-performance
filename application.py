@@ -201,63 +201,83 @@ def scatterLongitude():
 
 
 
+# @app.route('/practicequiz')
+# def rangewithmag():
+#     magfrom = float(request.args.get('magfrom',''))
+#     magto= float(request.args.get('magto',''))
+#     count = int(request.args.get('count',''))
+#     interval= float(request.args.get('interval',''))
+#     i=0
+#     timewithoutredis=[]
+#     timewithredis=[]
+#     totaltime=[]
+#     while i< int(count):
+#         lower=randrange_float(magfrom,magto,interval)
+#         upper=randrange_float(magfrom,magto,interval)
+#         if float(lower)>float(upper):
+#             temp=lower
+#             lower=upper
+#             upper=temp
+#         steplow=float(lower) 
+#         stephigh=steplow+interval
+#         #Without Redis 
+#         while float(stephigh)<float(upper):
+#             sqlQuery="SELECT Count(*) FROM QUAKES WHERE MAG BETWEEN '"+str(lower)+"' AND '"+str(upper)+"' ;"
+#             row,noredistime=connectAndQueryRun(sqlQuery)
+#             steplow+=float(interval)
+#             stephigh+=float(interval)
+#             timewithoutredis.append(noredistime)
+#         #With Redis
+#         while float(stephigh)<float(upper):
+#             sqlQuery="SELECT Count(*) FROM QUAKES WHERE MAG BETWEEN '"+str(lower)+"' AND '"+str(upper)+"' ;"
+#             myHostname = "akshay.redis.cache.windows.net"
+#             myPassword = "JehPyQGvHgF20jSqBN0k9n6sAgGDGaMSgaoKnO3DoXY="
+#             r = redis.StrictRedis(host=myHostname, port=6380,password=myPassword,ssl=True)
+#             key="SQL:"+sqlQuery
+#             if r.get(key):
+#                 print("working")
+#                 rtic=time.time()
+#                 value=r.get(key)
+#                 rtoc=time.time()
+#                 rtime=rtoc-rtic
+#             else:
+#                 rtic=time.time()
+#                 row,noredistime=connectAndQueryRun(sqlQuery)
+#                 r.set(key,str(row))
+#                 rtoc=time.time()
+#                 rtime=rtoc-rtic
+
+#             steplow+=float(interval)
+#             stephigh+=float(interval)
+#             timewithredis.append(rtime)
+#         i+=1
+#     print(len(timewithoutredis))
+#     print(len(timewithredis))
+#     for i in range(0,len(timewithoutredis)):
+#         totaltime.append([timewithoutredis[i],timewithredis[i]])
+
+#     return render_template('something.html',time=totaltime)
+
+
 @app.route('/practicequiz')
 def rangewithmag():
     magfrom = float(request.args.get('magfrom',''))
     magto= float(request.args.get('magto',''))
     count = int(request.args.get('count',''))
     interval= float(request.args.get('interval',''))
-    i=0
-    timewithoutredis=[]
-    timewithredis=[]
-    totaltime=[]
-    while i< int(count):
-        lower=randrange_float(magfrom,magto,interval)
-        upper=randrange_float(magfrom,magto,interval)
-        if float(lower)>float(upper):
-            temp=lower
-            lower=upper
-            upper=temp
-        steplow=float(lower) 
-        stephigh=steplow+interval
-        #Without Redis 
-        while float(stephigh)<float(upper):
-            sqlQuery="SELECT Count(*) FROM QUAKES WHERE MAG BETWEEN '"+str(lower)+"' AND '"+str(upper)+"' ;"
-            row,noredistime=connectAndQueryRun(sqlQuery)
-            steplow+=float(interval)
-            stephigh+=float(interval)
-            timewithoutredis.append(noredistime)
-        #With Redis
-        while float(stephigh)<float(upper):
-            sqlQuery="SELECT Count(*) FROM QUAKES WHERE MAG BETWEEN '"+str(lower)+"' AND '"+str(upper)+"' ;"
-            myHostname = "akshay.redis.cache.windows.net"
-            myPassword = "JehPyQGvHgF20jSqBN0k9n6sAgGDGaMSgaoKnO3DoXY="
-            r = redis.StrictRedis(host=myHostname, port=6380,password=myPassword,ssl=True)
-            key="SQL:"+sqlQuery
-            if r.get(key):
-                print("working")
-                rtic=time.time()
-                value=r.get(key)
-                rtoc=time.time()
-                rtime=rtoc-rtic
-            else:
-                rtic=time.time()
-                row,noredistime=connectAndQueryRun(sqlQuery)
-                r.set(key,str(row))
-                rtoc=time.time()
-                rtime=rtoc-rtic
-
-            steplow+=float(interval)
-            stephigh+=float(interval)
-            timewithredis.append(rtime)
-        i+=1
-    print(len(timewithoutredis))
-    print(len(timewithredis))
-    for i in range(0,len(timewithoutredis)):
-        totaltime.append([timewithoutredis[i],timewithredis[i]])
-
-    return render_template('something.html',time=totaltime)
-
+    time=[]
+    timewithOutRedis=0
+    timewithRedis=0
+    for i in range(count):
+        random_num=randrange_float(magfrom,magto,interval)
+        sqlQuery = "select place from QUAKES where mag = '"+str(random_num)+"';"
+        elapsedWithoutRedis,elapsedWithRedis=sqlconnwithredis(sqlQuery,1)
+        #print(elapsedWithoutRedis[0],elapsedWithRedis[0])
+        timewithOutRedis+=elapsedWithoutRedis[0]
+        timewithRedis+=elapsedWithRedis[0]
+        time.append([elapsedWithoutRedis[0],elapsedWithRedis[0]])
+    
+    return render_template('something.html',time=time,withOutRedis=timewithOutRedis,withRedis=timewithRedis)
          
 
 port = os.getenv('PORT', '8000')
