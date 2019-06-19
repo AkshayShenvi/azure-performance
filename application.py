@@ -51,9 +51,10 @@ def connectAndQueryRun(sqlQuery):
     return row, acttime
 
 
-def sqlconnwithredis(sqlQuery,num):
+def sqlconnwithredis(sqlQuery,num=None,method="Both"):
     #try:
-
+    myHostname = "akshay.redis.cache.windows.net"
+    myPassword = "JehPyQGvHgF20jSqBN0k9n6sAgGDGaMSgaoKnO3DoXY="
     server = 'akshayshenvi.database.windows.net'
     database = 'Earthquakes'
     username = 'akshay@akshayshenvi'
@@ -62,49 +63,88 @@ def sqlconnwithredis(sqlQuery,num):
     connection = pyodbc.connect('DRIVER='+driver+';SERVER='+server+';PORT=1433;DATABASE='+database+';UID='+username+';PWD='+ password)
     cursor = connection.cursor()
     #Without Redis
-    elapsedworedis=[]
-    elapsedwithredis=[]
+    elapsedWithoutRedis=[]
+    elapsedWithRedis=[]
     if num == None:
         num= 1
-
-    for i in range(num):
-        wotic=time.time()
-        cursor.execute(sqlQuery)
-        wotoc=time.time()
-        elapsedworedis.append(wotoc-wotic)
-    row = cursor.fetchall()
+    if method=="Without redis":
+        for i in range(num):
+            wotic=time.time()
+            cursor.execute(sqlQuery)
+            wotoc=time.time()
+            elapsedWithoutRedis.append(wotoc-wotic)
+        row = cursor.fetchall()
+        return elapsedWithoutRedis,elapsedWithRedis,row
     
     #elapsedworedis.append(wotoc-wotic)
 
     #With Redis
-    myHostname = "akshay.redis.cache.windows.net"
-    myPassword = "JehPyQGvHgF20jSqBN0k9n6sAgGDGaMSgaoKnO3DoXY="
-    r = redis.StrictRedis(host=myHostname, port=6380,password=myPassword,ssl=True)
-    #cursor = connection.cursor()
-    if num == None:
-        num= 1
-    key="SQL:"+sqlQuery
-    for i in range(num):
+    elif method=="With redis":
         
-        if r.get(key):
-            wtic=time.time()
-            value=r.get(key)
-            wtoc=time.time()
+        r = redis.StrictRedis(host=myHostname, port=6380,password=myPassword,ssl=True)
+        #cursor = connection.cursor()
+        if num == None:
+            num= 1
+        key="SQL:"+sqlQuery
+        for i in range(num):
             
-            print("Redis working")
-        else:
-            wtic=time.time()
+            if r.get(key):
+                wtic=time.time()
+                row=r.get(key)
+                wtoc=time.time()
+                row=row.decode("utf-8")
+                
+                print("Redis working")
+            else:
+                wtic=time.time()
+                cursor.execute(sqlQuery)
+                wtoc=time.time()
+                row = cursor.fetchall()
+                r.set(key,str(row))
+                
+                #r.expire()
+                print("Not found in redis")
+            
+            elapsedWithRedis.append(wtoc-wtic)
+        return elapsedWithoutRedis,elapsedWithRedis,row
+    
+    elif method=="Both":
+        for i in range(num):
+            wotic=time.time()
             cursor.execute(sqlQuery)
-            wtoc=time.time()
-            row = cursor.fetchall()
-            r.set(key,str(row))
-            #r.expire()
-            print("Not found in redis")
-           
-        elapsedwithredis.append(wtoc-wtic)
+            wotoc=time.time()
+            elapsedWithoutRedis.append(wotoc-wotic)
+        row = cursor.fetchall()
+
+        
+        r = redis.StrictRedis(host=myHostname, port=6380,password=myPassword,ssl=True)
+        #cursor = connection.cursor()
+        if num == None:
+            num= 1
+        key="SQL:"+sqlQuery
+        for i in range(num):
+            
+            if r.get(key):
+                wtic=time.time()
+                row=r.get(key)
+                wtoc=time.time()
+                row=row.decode("utf-8")
+                print("Redis working")
+            else:
+                wtic=time.time()
+                cursor.execute(sqlQuery)
+                wtoc=time.time()
+                row = cursor.fetchall()
+                r.set(key,str(row))
+                #r.expire()
+                print("Not found in redis")
+            
+            elapsedWithRedis.append(wtoc-wtic)
+        return elapsedWithoutRedis,elapsedWithRedis,row
 
 
-    return elapsedworedis,elapsedwithredis
+
+   
 
     # except:
     #     return("Connection Failed, Try Again.")
@@ -121,7 +161,7 @@ def randomQuery():
     #sqlQuery= "SELECT * FROM QUAKES;"
     tic= time.time()
 
-    sqlconn(sqlQuery,num)
+    row=sqlconn(sqlQuery,num)
     toc= time.time()
     timeelapsed = toc-tic
     return render_template("showrecords.html",result=timeelapsed)
@@ -134,7 +174,7 @@ def complexquery():
     num = int(request.args.get('num',''))
     sqlQuery= "SELECT * FROM QUAKES WHERE mag BETWEEN "+magfrom+" AND "+magto+" ;"
     tic = time.time()
-    sqlconn(sqlQuery,num)
+    row=sqlconn(sqlQuery,num)
     toc = time.time()
     timeelapsed =toc-tic
     return render_template("showrecords.html",result=timeelapsed)
@@ -264,17 +304,23 @@ def rangewithmag():
     latfrom = float(request.args.get('latfrom',''))
     latto= float(request.args.get('latto',''))
     count = int(request.args.get('count',''))
+    method= str(request.args.get('redisopt',''))
     #interval= float(request.args.get('interval',''))
-    myHostname = "akshay.redis.cache.windows.net"
-    myPassword = "JehPyQGvHgF20jSqBN0k9n6sAgGDGaMSgaoKnO3DoXY="
+    # myHostname = "akshay.redis.cache.windows.net"
+    # myPassword = "JehPyQGvHgF20jSqBN0k9n6sAgGDGaMSgaoKnO3DoXY="
     
-    r = redis.StrictRedis(host=myHostname, port=6380,password=myPassword,ssl=True)
+    # r = redis.StrictRedis(host=myHostname, port=6380,password=myPassword,ssl=True)
     timeli=[]
     data=[]
     randnumbers=[]
+    timeWithoutRedis=[]
+    timeWithRedis=[]
+    withoutRedis=0
+    withRedis=0
     #timewithOutRedis=0
     #timewithRedis=0
     totaltime=0
+
     for i in range(count):
         
         randomnumfrom = round((random.uniform(float(latfrom),float(latto))),1)
@@ -286,39 +332,51 @@ def rangewithmag():
             randomnumfrom=randomnumto
             randomnumto=temp
         sqlQuery = "select count(*) from QUAKES1 where latitude BETWEEN '"+str(randomnumfrom)+"' AND '"+str(randomnumto)+"';"
-        key="SQL:"+sqlQuery
-        tic=time.time()
-        #row=sqlconn(sqlQuery)
-        
-
-
-        if r.get(key):
-            
-            value=r.get(key)
-            
-            
-            print("Redis working")
+        timeWithoutRedis,timeWithRedis,row=sqlconnwithredis(sqlQuery,1,method)
+        if len(timeWithoutRedis)==0:
+            withoutRedis=None
         else:
-            
-            row=sqlconn(sqlQuery)
-            
-            
-            r.set(key,str(row))
-            #r.expire()
-            print("Not found in redis")
-        toc=time.time()
+            for i in timeWithoutRedis:
+                withoutRedis+=i
+        if len(timeWithRedis)==0:
+            withRedis=None
+        else:
+            for i in timeWithRedis:
+                withRedis+=i
+        
+        # key="SQL:"+sqlQuery
+        # tic=time.time()
+        # #row=sqlconn(sqlQuery)
         
 
+
+        # if r.get(key):
+            
+        #     value=r.get(key)
+            
+            
+        #     print("Redis working")
+        # else:
+            
+        #     row=sqlconn(sqlQuery)
+            
+            
+        #     r.set(key,str(row))
+        #     #r.expire()
+        #     print("Not found in redis")
+        # toc=time.time()
+        
+        print(row)
         randnumbers.append([randomnumfrom,randomnumto,row[0][0]])
-        print(row[0][0])
+        
         # if len(row) ==0:
         #     continue
         # else:
         #     #print(row[0])
         #     data.append(row[0])
-        time1=toc-tic
-        totaltime+=time1
-        timeli.append(time1)
+        # time1=toc-tic
+        # totaltime+=time1
+        # timeli.append(time1)
     #print(randnumbers)
 
 
@@ -329,7 +387,7 @@ def rangewithmag():
         #timewithRedis+=elapsedWithRedis[0]
         #time.append([elapsedWithoutRedis[0],elapsedWithRedis[0]])
     
-    return render_template('something.html',time=timeli,randnumbers=randnumbers,totaltime=totaltime)
+    return render_template('something.html',withoutRedis=withoutRedis,withRedis=withRedis,randnumbers=randnumbers)
 
 
 # @app.route('/practicequiz')
