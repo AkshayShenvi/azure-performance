@@ -55,6 +55,8 @@ def sqlconnwithredis(sqlQuery,num=None,method="Both"):
     #try:
     myHostname = "akshay.redis.cache.windows.net"
     myPassword = "JehPyQGvHgF20jSqBN0k9n6sAgGDGaMSgaoKnO3DoXY="
+    r = redis.StrictRedis(host=myHostname, port=6380,password=myPassword,ssl=True)
+    key="SQL:"+sqlQuery
     server = 'akshayshenvi.database.windows.net'
     database = 'Earthquakes'
     username = 'akshay@akshayshenvi'
@@ -73,7 +75,11 @@ def sqlconnwithredis(sqlQuery,num=None,method="Both"):
             cursor.execute(sqlQuery)
             wotoc=time.time()
             elapsedWithoutRedis.append(wotoc-wotic)
+            
+
         row = cursor.fetchall()
+        if not r.exists(key):
+                r.set(key,str(row[0]))
         return elapsedWithoutRedis,elapsedWithRedis,row
     
     #elapsedworedis.append(wotoc-wotic)
@@ -81,29 +87,30 @@ def sqlconnwithredis(sqlQuery,num=None,method="Both"):
     #With Redis
     elif method=="With redis":
         
-        r = redis.StrictRedis(host=myHostname, port=6380,password=myPassword,ssl=True)
+        
         #cursor = connection.cursor()
         if num == None:
             num= 1
-        key="SQL:"+sqlQuery
+        
         for i in range(num):
             
             if r.get(key):
+                
                 wtic=time.time()
                 row=r.get(key)
                 wtoc=time.time()
                 row=row.decode("utf-8")
-                
-                print("Redis working")
+                row=int(row[1:-3])
+                #print("Redis working")
             else:
                 wtic=time.time()
                 cursor.execute(sqlQuery)
                 wtoc=time.time()
                 row = cursor.fetchall()
-                r.set(key,str(row))
+                r.set(key,str(row[0]))
                 
                 #r.expire()
-                print("Not found in redis")
+                #print("Not found in redis")
             
             elapsedWithRedis.append(wtoc-wtic)
         return elapsedWithoutRedis,elapsedWithRedis,row
@@ -114,14 +121,17 @@ def sqlconnwithredis(sqlQuery,num=None,method="Both"):
             cursor.execute(sqlQuery)
             wotoc=time.time()
             elapsedWithoutRedis.append(wotoc-wotic)
+            
         row = cursor.fetchall()
+        if not r.exists(key):
+                r.set(key,str(row[0]))
 
         
-        r = redis.StrictRedis(host=myHostname, port=6380,password=myPassword,ssl=True)
+        
         #cursor = connection.cursor()
         if num == None:
             num= 1
-        key="SQL:"+sqlQuery
+        
         for i in range(num):
             
             if r.get(key):
@@ -129,7 +139,11 @@ def sqlconnwithredis(sqlQuery,num=None,method="Both"):
                 row=r.get(key)
                 wtoc=time.time()
                 row=row.decode("utf-8")
-                print("Redis working")
+                
+                row=int(row[1:-3])
+                
+                
+                #print("Redis working")
             else:
                 wtic=time.time()
                 cursor.execute(sqlQuery)
@@ -137,7 +151,7 @@ def sqlconnwithredis(sqlQuery,num=None,method="Both"):
                 row = cursor.fetchall()
                 r.set(key,str(row))
                 #r.expire()
-                print("Not found in redis")
+                #print("Not found in redis")
             
             elapsedWithRedis.append(wtoc-wtic)
         return elapsedWithoutRedis,elapsedWithRedis,row
@@ -325,7 +339,7 @@ def rangewithmag():
         
         randomnumfrom = round((random.uniform(float(latfrom),float(latto))),1)
         randomnumto = round((random.uniform(float(latfrom),float(latto))),1)
-        print(randomnumfrom,randomnumto)
+        #print(randomnumfrom,randomnumto)
         
         if float(randomnumfrom)>float(randomnumto):
             temp=randomnumfrom
@@ -365,9 +379,13 @@ def rangewithmag():
         #     #r.expire()
         #     print("Not found in redis")
         # toc=time.time()
-        
-        print(row)
-        randnumbers.append([randomnumfrom,randomnumto,row[0][0]])
+        #print(row)
+
+        if isinstance(row, int):
+
+            randnumbers.append([randomnumfrom,randomnumto,row])
+        else:
+            randnumbers.append([randomnumfrom,randomnumto,row[0][0]])
         
         # if len(row) ==0:
         #     continue
