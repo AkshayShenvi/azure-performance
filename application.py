@@ -232,26 +232,29 @@ def showdate():
 def magrange():
     magfrom = request.args.get('magfrom','')
     magto= request.args.get('magto','')
-    step = request.args.get('step','')
+    #step = request.args.get('step','')
     chart= request.args.get('chart','')
-    if float(magfrom)>float(magto):
-        temp=magfrom
-        magfrom=magto
-        magto=temp
-    startmag= float(magfrom)
-    stependmag = startmag+float(step)
-    result=[]
-    while stependmag<=float(magto):
-        sqlQuery="SELECT COUNT(*) AS COUNT FROM QUAKES WHERE MAG BETWEEN '"+str(startmag)+"' AND '"+str(stependmag)+"';"
-        row,acttime=connectAndQueryRun(sqlQuery)
-        print(row[0])
-        ans=int(row[0][0])
-        result.append([startmag,stependmag,ans])
-        startmag+=float(step)
-        stependmag+=float(step)
+    # if float(magfrom)>float(magto):
+    #     temp=magfrom
+    #     magfrom=magto
+    #     magto=temp
+    # startmag= float(magfrom)
+    # stependmag = startmag+float(step)
+    # result=[]
+    #while stependmag<=float(magto):
+    sqlQuery="select statename, totalpop  from voting where totalpop between 5000 and 10000  "
+        #sqlQuery="SELECT COUNT(*) AS COUNT FROM QUAKES WHERE MAG BETWEEN '"+str(startmag)+"' AND '"+str(stependmag)+"';"
+    row,acttime=connectAndQueryRun(sqlQuery)
+    print(row)
+    sqlQuery="select statename, totalpop  from voting where totalpop between 10000 and 50000"
+    row1,acttime=connectAndQueryRun(sqlQuery)
+        #ans=int(row[0][0])
+        #result.append([startmag,stependmag,ans])
+        #startmag+=float(step)
+        #stependmag+=float(step)
     #print(result[0][0])
-    print(result)
-    return render_template('showrecords.html',creds=Creds,result=result,chart=chart)
+    #print(result)
+    return render_template('showrecords.html',creds=Creds,result=row,chart=chart,result1=row1)
 
 @app.route('/scatterlongitude')
 def scatterLongitude():
