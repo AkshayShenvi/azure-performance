@@ -221,7 +221,9 @@ def groupbyclause():
 
 @app.route("/showdate")
 def showdate():
-    sqlQuery="select  Count(*),CONVERT(VARCHAR(10), TIME, 111) from QUAKES Group by CONVERT(VARCHAR(10), TIME, 111);"
+    datefrom = request.args.get('datefrom','')
+    dateto = request.args.get('dateto','')
+    sqlQuery="select  Count(*),CONVERT(VARCHAR(10), TIME, 111) from QUAKES WHERE CONVERT(VARCHAR(10), TIME, 111) BETWEEN '"+datefrom+"' AND '"+dateto+"' Group by CONVERT(VARCHAR(10), TIME, 111);"
     row,acttime=connectAndQueryRun(sqlQuery)
     print(row)
     return render_template('datechart.html',creds=Creds,result=row)
@@ -268,7 +270,7 @@ def scatterLongitude():
         lat=float(i[0])
         longitude=float(i[1])
         loc.append([lat,longitude])
-    return render_template('scatterlongilati.html',result=loc)
+    return render_template('scatterlongilati.html',creds=Creds,result=loc)
 
 
 

@@ -124,6 +124,20 @@
           {{i[1]}}
           {% endfor %}
           </h1>
+          <table border="1">
+              <tr>
+                      <th>Start - End</th>
+                      <th>count</th>
+                    </tr>
+                    {% for i in result %}
+                    <tr>
+                      <td>{{i[0]}}-{{1}}</td>
+                      <td>{{i[2]}}</td>
+                    </tr>
+                    {% endfor%}
+      </table>
+
+
          {% if chart=="Bar Chart"%}
          <hr>
          <div id="chart_div"></div>
