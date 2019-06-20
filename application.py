@@ -294,7 +294,7 @@ def question6():
 			rows.append([i+step,row[0]])
 			row = cursor.fetchone()
 		i = i + step
-	return render_template('quest6.html', result= rows)
+	return render_template('quest6.html', result= rows,creds=Creds)
 
 @app.route('/magrange1')
 def question8():
@@ -302,16 +302,16 @@ def question8():
 	rows = []
 	i = 0
 	while(i <= 17000):
-		sql = "select count(*) from voting where registered between '"+str(i)+"' and '"+str(i+step)+"' "
+		sql = "select count(distinct statename) from voting where registered between '"+str(i)+"' and '"+str(i+step)+"' "
 		cursor = connection.cursor()
 		cursor.execute(sql)
 		row = cursor.fetchone()
-		while row:
-			rows.append([i,row[0]])
-			row = cursor.fetchone()
+		# print(row[0])
+		# while row:
+		rows.append([i, i+step, row[0]])
+			# row = cursor.fetchone()
 		i = i + step
-    
-	return render_template('multiHistogram.html', result= rows)
+	return render_template('quest8.html', result= rows,creds=Creds)
 
 
 @app.route('/scatterlongitude')
