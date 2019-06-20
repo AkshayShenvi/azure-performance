@@ -1,7 +1,11 @@
 <html>
    <body>
-         <h1>1001670648</h1>
-      <h1>SHENVI, AKSHAY</h1>
+         <h1>
+               {% for i in creds%}
+               {{i[0]}},
+               {{i[1]}}
+               {% endfor %}
+         </h1>
       
       <!-- <hr>
       <h1>Question 1:</h1>
@@ -24,13 +28,20 @@
          <p>Enter Mag to:<input type="text" name="magto"/></p>
          <p>Enter number of times to be run: <input type="text" name="num"/></p>
          <p><input type = "submit" value = "submit" /></p>
-      </form>
+      </form>-->
       <hr>
       <h1>Magnitude Range- Assignment-2</h1>
       <form action ="/magrange" method="GET">
          <p>Enter Magnitude from:<input type="text" name="magfrom"/></p>
          <p>Enter Magnitude to:<input type="text" name="magto"/></p>
          <p>Enter Step Size:<input type="text" name="step"/></p>
+         <select name="chart">
+               <option value="Bar Chart">Bar Chart</option>
+               <option value="Pie Chart">Pie Chart</option>
+               <option value="Scatterplot">Scatterplot</option>
+               <option value="Histogram">Histogram</option>
+               
+             </select>
          <p><input type="submit" value="submit"/></p>
       </form>
       <hr>
@@ -40,21 +51,32 @@
          <p>Enter Magnitude to:<input type="text" name="magto"/></p>
          
          <p><input type="submit" value="submit"/></p>
-      </form> -->
-      <hr>
+      </form> 
+      <!-- <hr>
       <h1>Quiz 3- Question:8</h1>
       <form action ="/practicequiz" method="GET">
          <p>Enter Latitude from:<input type="text" name="latfrom"/></p>
          <p>Enter Latitude to:<input type="text" name="latto"/></p>
-         <p>Enter Count:<input type="text" name="count"/></p>
+         <p>Enter Count:<input type="text" name="count"/></p> -->
          <!-- <p>Enter Interval:<input type="text" name="interval"/></p>  -->
 
-         <select name="redisopt">
+         <!-- <select name="redisopt">
                <option value="With redis">With Redis</option>
                <option value="Without redis">Without Redis</option>
                <option value="Both">Both</option>
                
              </select>
+         <p><input type="submit" value="submit"/></p>
+      </form> -->
+      <hr>
+      <form action="/group" method="GET">
+         <h2>Piechart With Table</h2>
+         
+         <p><input type="submit" value="submit"/></p>
+      </form>
+      <hr>
+      <form action="showdate" method="GET">
+         <h2>Date</h2>
          <p><input type="submit" value="submit"/></p>
       </form>
       </body>

@@ -103,8 +103,8 @@
                                 ]);
                             var options = {
                               title: 'Count of Mag Ranges',
-                              hAxis: {title: 'Magnitude', minValue: 0, maxValue: 15},
-                                vAxis: {title: 'Count', minValue: 0, maxValue: 15},
+                              hAxis: {title: 'Count', minValue: 0, maxValue: 15},
+                                vAxis: {title: 'Magnitude', minValue: 0, maxValue: 15},
                               legend: { position: 'none' },
                             };
 
@@ -118,16 +118,25 @@
                   
       </head>
    <body>
-         <h1>AKSHAY SHENVI</h1>
-         <h1>1001670648</h1>
+      <h1>
+          {% for i in creds%}
+          {{i[0]}},
+          {{i[1]}}
+          {% endfor %}
+          </h1>
+         {% if chart=="Bar Chart"%}
          <hr>
          <div id="chart_div"></div>
+         {% elif chart=="Pie Chart"%}
          <hr>
          <div id="piechart" style="width: 900px; height: 500px;"></div>
+         {% elif chart=="Scatterplot"%}
          <hr>
          <div id="chart_div_scatterplot" style="width: 900px; height: 500px;"></div>
+         {% elif chart=="Histogram"%}
          <hr>
          <div id="chart_div_histogram" style="width: 900px; height: 500px;"></div>
+         {% endif %}
             
 
             

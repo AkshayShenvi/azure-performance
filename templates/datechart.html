@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>
+            Akshay's Date
+        </title>
+        <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+                  <script>
+            google.charts.load('current', {packages: ['corechart', 'bar']});
+            google.charts.setOnLoadCallback(drawMaterial);
+            
+            function drawMaterial() {
+                  var data = google.visualization.arrayToDataTable([
+                    [ 'Date', 'count'],
+                    {% for i in result %}
+                    [ '{{i[1]}}',Number('{{i[0]}}')],
+                    {% endfor%}
+                  ]);
+            
+                  var materialOptions = {
+                    chart: {
+                      title: 'Date Vs Count'
+                    },
+                    hAxis: {
+                      title: 'Date',
+                      minValue: 0,
+                    },
+                    vAxis: {
+                      title: 'Count'
+                    },
+                    bars: 'verticle'
+                  };
+                  var materialChart = new google.charts.Bar(document.getElementById('chart_div'));
+                  materialChart.draw(data, materialOptions);
+                }
+                        </script> 
+    </head>
+    <body>
+        <h1>
+        {% for i in creds%}
+        {{i[0]}},
+        {{i[1]}}
+        {% endfor %}
+        </h1>
+        <table border="1">
+                <tr>
+                        <th>Date</th>
+                        <th>Count</th>
+                      </tr>
+                      {% for i in result %}
+                      <tr>
+                        <td>{{i[1]}}</td>
+                        <td>{{i[0]}}</td>
+                      </tr>
+                      {% endfor%}
+        </table>
+        <div id="chart_div"></div>
+    </body>
+</html>
