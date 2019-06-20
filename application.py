@@ -14,6 +14,12 @@ Creds=[]
 Name='Akshay Shenvi'
 UtaID='1001670648'
 Creds.append([UtaID,Name])
+server = 'akshayshenvi.database.windows.net'
+database = 'Earthquakes'
+username = 'akshay@akshayshenvi'
+password = 'Akshata1992'
+driver= '{ODBC Driver 17 for SQL Server}'
+connection = pyodbc.connect('DRIVER='+driver+';SERVER='+server+';PORT=1433;DATABASE='+database+';UID='+username+';PWD='+ password)
 
 def randrange_float(start, stop, step):
     return random.randint(0, int(round(abs(((stop - start) / step)))))
@@ -51,7 +57,7 @@ def connectAndQueryRun(sqlQuery):
     cursor.execute(sqlQuery)
     toc= time.time()
     acttime=toc-tic
-    row = cursor.fetchall()
+    row = cursor.fetchone()
     #print(row[0][0])
     return row, acttime
 
@@ -228,33 +234,85 @@ def showdate():
     print(row)
     return render_template('datechart.html',creds=Creds,result=row)
 
-@app.route("/magrange")
-def magrange():
-    magfrom = request.args.get('magfrom','')
-    magto= request.args.get('magto','')
-    #step = request.args.get('step','')
-    chart= request.args.get('chart','')
-    # if float(magfrom)>float(magto):
-    #     temp=magfrom
-    #     magfrom=magto
-    #     magto=temp
-    # startmag= float(magfrom)
-    # stependmag = startmag+float(step)
-    # result=[]
-    #while stependmag<=float(magto):
-    sqlQuery="select statename, totalpop  from voting where totalpop between 5000 and 10000  "
-        #sqlQuery="SELECT COUNT(*) AS COUNT FROM QUAKES WHERE MAG BETWEEN '"+str(startmag)+"' AND '"+str(stependmag)+"';"
-    row,acttime=connectAndQueryRun(sqlQuery)
-    print(row)
-    sqlQuery="select statename, totalpop  from voting where totalpop between 10000 and 50000"
-    row1,acttime=connectAndQueryRun(sqlQuery)
-        #ans=int(row[0][0])
-        #result.append([startmag,stependmag,ans])
-        #startmag+=float(step)
-        #stependmag+=float(step)
-    #print(result[0][0])
-    #print(result)
-    return render_template('showrecords.html',creds=Creds,result=row,chart=chart,result1=row1)
+# @app.route("/magrange")
+# def magrange():
+#     n = int(request.args.get('n',''))
+#     # magto= request.args.get('magto','')
+#     #step = request.args.get('step','')
+#     chart= request.args.get('chart','')
+#     # if float(magfrom)>float(magto):
+#     #     temp=magfrom
+#     #     magfrom=magto
+#     #     magto=temp
+#     # startmag= float(magfrom)
+#     # stependmag = startmag+float(step)
+#     # result=[]
+#     #while stependmag<=float(magto):
+#     sqlQuery="select (voted/totalpop * 100) as avg1 from voting;  "
+#         #sqlQuery="SELECT COUNT(*) AS COUNT FROM QUAKES WHERE MAG BETWEEN '"+str(startmag)+"' AND '"+str(stependmag)+"';"
+#     row,acttime=connectAndQueryRun(sqlQuery)
+#     noOfGrps=40/n
+#     for i in range(noOfGrps):
+#         if row[0][0]==((i+1)*40/noOfGrps):
+
+#     print(row[0][0])
+#     # sqlQuery="select statename, totalpop  from voting where totalpop between 10000 and 50000"
+#     # row1,acttime=connectAndQueryRun(sqlQuery)
+#         #ans=int(row[0][0])
+#         #result.append([startmag,stependmag,ans])
+#         #startmag+=float(step)
+#         #stependmag+=float(step)
+#     #print(result[0][0])
+#     #print(result)
+#     return None#render_template('showrecords.html',creds=Creds,result=row,chart=chart,result1=row1)
+# @app.route('/magrange')
+# def magrange():
+#     n = int(request.args.get('n'))
+#     rows = []
+#     i = 0
+#     while(i <= 100):
+#         sqlQuery = "select count(*) from voting where (voted/totalpop * 100)  between '"+str(i)+"' and '"+str(i+n)+"'; "
+#         row,acttime=connectAndQueryRun(sqlQuery)
+#         while row:
+# 			rows.append([i+step,row[0]])
+# 			row = cursor.fetchone()
+# 		i = i + step
+#     print(row)
+# 	return render_template('showrecords.html', result= rows)
+
+@app.route('/magrange')
+def question6():
+	step = int(request.args.get('step'))
+	rows = []
+	i = 0
+	while(i <= 100):
+		sql = "select count(*) from voting where (voted/totalpop * 100)  between '"+str(i)+"' and '"+str(i+step)+"' "
+		cursor = connection.cursor()
+		cursor.execute(sql)
+		row = cursor.fetchone()
+		while row:
+			rows.append([i+step,row[0]])
+			row = cursor.fetchone()
+		i = i + step
+	return render_template('quest6.html', result= rows)
+
+@app.route('/magrange1')
+def question8():
+	step = int(request.args.get('step')+"000")
+	rows = []
+	i = 0
+	while(i <= 17000):
+		sql = "select count(*) from voting where registered between '"+str(i)+"' and '"+str(i+step)+"' "
+		cursor = connection.cursor()
+		cursor.execute(sql)
+		row = cursor.fetchone()
+		while row:
+			rows.append([i,row[0]])
+			row = cursor.fetchone()
+		i = i + step
+    
+	return render_template('multiHistogram.html', result= rows)
+
 
 @app.route('/scatterlongitude')
 def scatterLongitude():
